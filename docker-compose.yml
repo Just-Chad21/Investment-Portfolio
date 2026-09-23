@@ -1,0 +1,21 @@
+# Frontend is published on 5173 (not nginx's default 80) specifically so the browser
+# origin matches CorsConfig's allowed origin (http://localhost:5173) with no backend
+# changes needed.
+services:
+  backend:
+    build:
+      context: ./assessment
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

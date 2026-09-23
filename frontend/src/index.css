@@ -257,6 +257,18 @@ h2 {
 
 .product-row .product-name {
   color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-type-tag {
+  font-size: 11px;
+  color: var(--muted-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
 }
 
 .product-row .product-balance {

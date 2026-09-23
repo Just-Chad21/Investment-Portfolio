@@ -5,6 +5,7 @@ import com.enviro.assessment.junior.chadwynprince.dto.response.ProductSummary;
 import com.enviro.assessment.junior.chadwynprince.entity.Investor;
 import com.enviro.assessment.junior.chadwynprince.entity.Portfolio;
 import com.enviro.assessment.junior.chadwynprince.entity.Product;
+import com.enviro.assessment.junior.chadwynprince.entity.ProductType;
 import com.enviro.assessment.junior.chadwynprince.exception.InvestorNotFoundException;
 import com.enviro.assessment.junior.chadwynprince.mapper.PortfolioMapper;
 import com.enviro.assessment.junior.chadwynprince.repository.PortfolioRepository;
@@ -42,7 +43,7 @@ class PortfolioServiceTest {
 
         var investor = new Investor("Thabo", "Nkosi", LocalDate.now().minusYears(45), "thabo@example.com");
         var portfolio = new Portfolio(investor, "PF-0001");
-        var product = new Product(portfolio, "Unit Trust", new BigDecimal("50000.00"));
+        var product = new Product(portfolio, "Unit Trust", ProductType.UNIT_TRUST, new BigDecimal("50000.00"));
 
         when(portfolioRepository.findByInvestorId(1L)).thenReturn(Optional.of(portfolio));
         when(productRepository.findByPortfolioId(portfolio.getId())).thenReturn(List.of(product));
@@ -53,7 +54,7 @@ class PortfolioServiceTest {
         assertThat(response.age()).isEqualTo(45);
         assertThat(response.portfolioNumber()).isEqualTo("PF-0001");
         assertThat(response.products())
-                .containsExactly(new ProductSummary(null, "Unit Trust", new BigDecimal("50000.00")));
+                .containsExactly(new ProductSummary(null, "Unit Trust", ProductType.UNIT_TRUST, new BigDecimal("50000.00")));
     }
 
     @Test

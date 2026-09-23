@@ -12,11 +12,11 @@ INSERT INTO portfolio (id, investor_id, portfolio_number, created_at) VALUES
     (2, 2, 'PF-0002', '2025-01-10 09:00:00'),
     (3, 3, 'PF-0003', '2025-01-10 09:00:00');
 
-INSERT INTO product (id, portfolio_id, name, balance, created_at, updated_at) VALUES
-    (1, 1, 'Unit Trust', 50000.00, '2025-01-10 09:00:00', '2026-09-15 10:00:00'),
-    (2, 1, 'Money Market', 20000.00, '2025-01-10 09:00:00', '2025-01-10 09:00:00'),
-    (3, 2, 'Retirement Annuity', 800000.00, '2025-01-10 09:00:00', '2026-09-16 11:00:00'),
-    (4, 3, 'Retirement Annuity', 300000.00, '2025-01-10 09:00:00', '2025-01-10 09:00:00');
+INSERT INTO product (id, portfolio_id, name, product_type, balance, created_at, updated_at) VALUES
+    (1, 1, 'Unit Trust', 'UNIT_TRUST', 50000.00, '2025-01-10 09:00:00', '2026-09-15 10:00:00'),
+    (2, 1, 'Money Market', 'MONEY_MARKET', 20000.00, '2025-01-10 09:00:00', '2025-01-10 09:00:00'),
+    (3, 2, 'Retirement Annuity', 'RETIREMENT_ANNUITY', 800000.00, '2025-01-10 09:00:00', '2026-09-16 11:00:00'),
+    (4, 3, 'Retirement Annuity', 'RETIREMENT_ANNUITY', 300000.00, '2025-01-10 09:00:00', '2025-01-10 09:00:00');
 
 INSERT INTO withdrawal_notice (product_id, investor_id, type, amount, status, rejection_reason, balance_after, requested_at) VALUES
     (1, 1, 'STANDARD', 5000.00, 'APPROVED', NULL, 50000.00, '2026-09-15 10:00:00'),

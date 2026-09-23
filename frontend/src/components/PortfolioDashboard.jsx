@@ -5,6 +5,14 @@ const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   currency: 'ZAR',
 });
 
+const PRODUCT_TYPE_LABELS = {
+  UNIT_TRUST: 'Unit Trust',
+  MONEY_MARKET: 'Money Market',
+  TAX_FREE_SAVINGS: 'Tax-Free Savings',
+  RETIREMENT_ANNUITY: 'Retirement Annuity',
+  PRESERVATION_FUND: 'Preservation Fund',
+};
+
 export default function PortfolioDashboard({ investorId, portfolio, loading, error, onRequestWithdrawal }) {
   if (loading) {
     return <p className="muted">Loading portfolio...</p>;
@@ -43,7 +51,10 @@ export default function PortfolioDashboard({ investorId, portfolio, loading, err
         <div className="product-list">
           {portfolio.products.map((product) => (
             <div className="product-row" key={product.productId}>
-              <span className="product-name">{product.name}</span>
+              <span className="product-name">
+                {product.name}
+                <span className="product-type-tag">{PRODUCT_TYPE_LABELS[product.productType] ?? product.productType}</span>
+              </span>
               <span className="product-balance">{currencyFormatter.format(product.balance)}</span>
             </div>
           ))}

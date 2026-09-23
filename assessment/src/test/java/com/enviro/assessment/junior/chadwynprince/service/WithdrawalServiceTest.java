@@ -5,6 +5,7 @@ import com.enviro.assessment.junior.chadwynprince.dto.response.WithdrawalRespons
 import com.enviro.assessment.junior.chadwynprince.entity.Investor;
 import com.enviro.assessment.junior.chadwynprince.entity.Portfolio;
 import com.enviro.assessment.junior.chadwynprince.entity.Product;
+import com.enviro.assessment.junior.chadwynprince.entity.ProductType;
 import com.enviro.assessment.junior.chadwynprince.entity.WithdrawalNotice;
 import com.enviro.assessment.junior.chadwynprince.entity.WithdrawalStatus;
 import com.enviro.assessment.junior.chadwynprince.entity.WithdrawalType;
@@ -76,7 +77,11 @@ class WithdrawalServiceTest {
     }
 
     private Product productWithBalance(String balance) {
-        return new Product(portfolio, "Test Product", new BigDecimal(balance));
+        return productWithBalance(ProductType.UNIT_TRUST, balance);
+    }
+
+    private Product productWithBalance(ProductType productType, String balance) {
+        return new Product(portfolio, "Test Product", productType, new BigDecimal(balance));
     }
 
     private void givenInvestorAndProduct(Investor investor, Product product) {
@@ -86,11 +91,11 @@ class WithdrawalServiceTest {
     }
 
     @Test
-    void standardWithdrawalWithinLimitsIsApproved() {
+    void withdrawalAgainstStandardProductWithinLimitsIsApproved() {
         givenInvestorAndProduct(investorAged(30), productWithBalance("10000.00"));
 
         WithdrawalResponse response = withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.STANDARD, new BigDecimal("5000.00")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("5000.00")));
 
         assertThat(response.status()).isEqualTo(WithdrawalStatus.APPROVED);
         assertThat(response.rejectionReason()).isNull();
@@ -98,21 +103,21 @@ class WithdrawalServiceTest {
     }
 
     @Test
-    void standardWithdrawalIgnoresAgeRule() {
+    void withdrawalAgainstStandardProductIgnoresAgeRule() {
         givenInvestorAndProduct(investorAged(30), productWithBalance("10000.00"));
 
         WithdrawalResponse response = withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.STANDARD, new BigDecimal("1000.00")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("1000.00")));
 
         assertThat(response.status()).isEqualTo(WithdrawalStatus.APPROVED);
     }
 
     @Test
-    void retirementWithdrawalRejectedWhenAgeExactly65() {
-        givenInvestorAndProduct(investorAged(65), productWithBalance("10000.00"));
+    void withdrawalAgainstRetirementProductRejectedWhenAgeExactly65() {
+        givenInvestorAndProduct(investorAged(65), productWithBalance(ProductType.RETIREMENT_ANNUITY, "10000.00"));
 
         WithdrawalResponse response = withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.RETIREMENT, new BigDecimal("1000.00")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("1000.00")));
 
         assertThat(response.status()).isEqualTo(WithdrawalStatus.REJECTED);
         assertThat(response.rejectionReason()).contains("age > 65").contains("65");
@@ -120,13 +125,26 @@ class WithdrawalServiceTest {
     }
 
     @Test
-    void retirementWithdrawalApprovedWhenAgeAbove65AndWithinLimits() {
-        givenInvestorAndProduct(investorAged(66), productWithBalance("10000.00"));
+    void withdrawalAgainstRetirementProductApprovedWhenAgeAbove65AndWithinLimits() {
+        givenInvestorAndProduct(investorAged(66), productWithBalance(ProductType.RETIREMENT_ANNUITY, "10000.00"));
 
         WithdrawalResponse response = withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.RETIREMENT, new BigDecimal("5000.00")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("5000.00")));
 
         assertThat(response.status()).isEqualTo(WithdrawalStatus.APPROVED);
+    }
+
+    @Test
+    void withdrawalCannotBypassAgeRuleAgainstRetirementProduct() {
+        // The request has no `type` field at all — the age rule must come purely from
+        // product.getProductType(), never from anything the client could assert.
+        givenInvestorAndProduct(investorAged(40), productWithBalance(ProductType.PRESERVATION_FUND, "10000.00"));
+
+        WithdrawalResponse response = withdrawalService.submitWithdrawal(INVESTOR_ID,
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("1000.00")));
+
+        assertThat(response.status()).isEqualTo(WithdrawalStatus.REJECTED);
+        assertThat(response.rejectionReason()).contains("Retirement withdrawals require age > 65");
     }
 
     @Test
@@ -134,7 +152,7 @@ class WithdrawalServiceTest {
         givenInvestorAndProduct(investorAged(30), productWithBalance("10000.00"));
 
         WithdrawalResponse response = withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.STANDARD, new BigDecimal("10000.01")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("10000.01")));
 
         assertThat(response.status()).isEqualTo(WithdrawalStatus.REJECTED);
         assertThat(response.rejectionReason()).isEqualTo("Withdrawal amount exceeds available balance");
@@ -147,7 +165,7 @@ class WithdrawalServiceTest {
         givenInvestorAndProduct(investorAged(30), productWithBalance("10000.00"));
 
         WithdrawalResponse response = withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.STANDARD, new BigDecimal("10000.00")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("10000.00")));
 
         assertThat(response.status()).isEqualTo(WithdrawalStatus.REJECTED);
         assertThat(response.rejectionReason()).isEqualTo("Withdrawal amount exceeds 90% of available balance");
@@ -158,7 +176,7 @@ class WithdrawalServiceTest {
         givenInvestorAndProduct(investorAged(30), productWithBalance("10000.00"));
 
         WithdrawalResponse response = withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.STANDARD, new BigDecimal("9000.01")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("9000.01")));
 
         assertThat(response.status()).isEqualTo(WithdrawalStatus.REJECTED);
         assertThat(response.rejectionReason()).isEqualTo("Withdrawal amount exceeds 90% of available balance");
@@ -169,7 +187,7 @@ class WithdrawalServiceTest {
         givenInvestorAndProduct(investorAged(30), productWithBalance("10000.00"));
 
         WithdrawalResponse response = withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.STANDARD, new BigDecimal("9000.00")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("9000.00")));
 
         assertThat(response.status()).isEqualTo(WithdrawalStatus.APPROVED);
         assertThat(response.balanceAfter()).isEqualByComparingTo("1000.00");
@@ -181,7 +199,7 @@ class WithdrawalServiceTest {
         givenInvestorAndProduct(investorAged(30), product);
 
         withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.STANDARD, new BigDecimal("4000.00")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("4000.00")));
 
         assertThat(product.getBalance()).isEqualByComparingTo("6000.00");
         verify(productRepository).save(product);
@@ -189,10 +207,10 @@ class WithdrawalServiceTest {
 
     @Test
     void rejectedWithdrawalDoesNotDebitProductBalance() {
-        givenInvestorAndProduct(investorAged(65), productWithBalance("10000.00"));
+        givenInvestorAndProduct(investorAged(65), productWithBalance(ProductType.RETIREMENT_ANNUITY, "10000.00"));
 
         withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.RETIREMENT, new BigDecimal("1000.00")));
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("1000.00")));
 
         verify(productRepository, never()).save(any());
     }
@@ -202,7 +220,7 @@ class WithdrawalServiceTest {
         when(investorRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.STANDARD, new BigDecimal("100.00"))))
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("100.00"))))
                 .isInstanceOf(InvestorNotFoundException.class);
     }
 
@@ -213,7 +231,7 @@ class WithdrawalServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> withdrawalService.submitWithdrawal(INVESTOR_ID,
-                new WithdrawalRequest(PRODUCT_ID, WithdrawalType.STANDARD, new BigDecimal("100.00"))))
+                new WithdrawalRequest(PRODUCT_ID, new BigDecimal("100.00"))))
                 .isInstanceOf(ProductNotFoundException.class);
     }
 

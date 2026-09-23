@@ -51,9 +51,10 @@ public class WithdrawalService {
         var product = productRepository.findByIdAndPortfolio_Investor_Id(request.productId(), investorId)
                 .orElseThrow(() -> new ProductNotFoundException(request.productId()));
 
+        WithdrawalType type = product.getProductType().getCategory();
         WithdrawalNotice notice = evaluateRules(investor, product, request)
-                .map(reason -> WithdrawalNotice.rejected(product, investorId, request.type(), request.amount(), reason))
-                .orElseGet(() -> approve(product, investorId, request));
+                .map(reason -> WithdrawalNotice.rejected(product, investorId, type, request.amount(), reason))
+                .orElseGet(() -> approve(product, investorId, type, request));
 
         withdrawalNoticeRepository.save(notice);
         return withdrawalMapper.toResponse(notice);
@@ -88,10 +89,10 @@ public class WithdrawalService {
         return withdrawalNoticeRepository.findByFilters(investorId, type, status, fromInclusive, toExclusive);
     }
 
-    private WithdrawalNotice approve(Product product, Long investorId, WithdrawalRequest request) {
+    private WithdrawalNotice approve(Product product, Long investorId, WithdrawalType type, WithdrawalRequest request) {
         product.debit(request.amount());
         productRepository.save(product);
-        return WithdrawalNotice.approved(product, investorId, request.type(), request.amount(), product.getBalance());
+        return WithdrawalNotice.approved(product, investorId, type, request.amount(), product.getBalance());
     }
 
     // Rule order is deliberate: the balance check is evaluated before the 90% check even
@@ -101,8 +102,12 @@ public class WithdrawalService {
     // of the generic "exceeds 90%" message. A request for exactly 100% of the balance passes
     // the balance check but is still rejected by the 90% check — withdrawing the full balance
     // is never allowed.
+    //
+    // The retirement check keys off product.getProductType().isRetirement() — a permanent
+    // property of the product — rather than a client-supplied request field, so a withdrawal
+    // can't dodge the age rule by simply not declaring itself RETIREMENT.
     private Optional<String> evaluateRules(Investor investor, Product product, WithdrawalRequest request) {
-        if (request.type() == WithdrawalType.RETIREMENT && investor.getAge() <= MIN_RETIREMENT_AGE) {
+        if (product.getProductType().isRetirement() && investor.getAge() <= MIN_RETIREMENT_AGE) {
             return Optional.of("Retirement withdrawals require age > 65 (investor is %d)".formatted(investor.getAge()));
         }
         if (request.amount().compareTo(product.getBalance()) > 0) {

@@ -21,10 +21,13 @@ CREATE TABLE product (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
     portfolio_id  BIGINT NOT NULL,
     name          VARCHAR(100) NOT NULL,
+    product_type  VARCHAR(30) NOT NULL,
     balance       DECIMAL(19,2) NOT NULL,
     created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT ck_product_balance_non_negative CHECK (balance >= 0),
+    CONSTRAINT ck_product_type CHECK (product_type IN
+        ('UNIT_TRUST', 'MONEY_MARKET', 'TAX_FREE_SAVINGS', 'RETIREMENT_ANNUITY', 'PRESERVATION_FUND')),
     CONSTRAINT fk_product_portfolio FOREIGN KEY (portfolio_id) REFERENCES portfolio(id)
 );
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ApiError, submitWithdrawal } from '../api/client';
 
-const WITHDRAWAL_TYPES = ['STANDARD', 'RETIREMENT'];
+const RETIREMENT_PRODUCT_TYPES = new Set(['RETIREMENT_ANNUITY', 'PRESERVATION_FUND']);
 
 const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   style: 'currency',
@@ -10,7 +10,6 @@ const currencyFormatter = new Intl.NumberFormat('en-ZA', {
 
 export default function WithdrawalForm({ investorId, products, investorAge, onSubmitted }) {
   const [productId, setProductId] = useState('');
-  const [type, setType] = useState('STANDARD');
   const [amount, setAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
@@ -46,7 +45,6 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
     try {
       const response = await submitWithdrawal(investorId, {
         productId: Number(productId),
-        type,
         amount: Number(amount),
       });
       setResult(response);
@@ -76,6 +74,8 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
   const hasFieldErrors = submitError instanceof ApiError && submitError.fieldErrors.length > 0;
 
   const isUnderRetirementAge = typeof investorAge === 'number' && investorAge <= 65;
+  const selectedProduct = products.find((product) => String(product.productId) === productId);
+  const isRetirementProduct = selectedProduct && RETIREMENT_PRODUCT_TYPES.has(selectedProduct.productType);
 
   return (
     <div className="modal-body">
@@ -112,20 +112,9 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
             ))}
           </select>
           {fieldErrorFor('productId') && <span className="field-error">{fieldErrorFor('productId')}</span>}
-        </div>
-
-        <div className="form-field">
-          <label htmlFor="withdrawal-type">Withdrawal type</label>
-          <select id="withdrawal-type" value={type} onChange={(event) => setType(event.target.value)}>
-            {WITHDRAWAL_TYPES.map((withdrawalType) => (
-              <option key={withdrawalType} value={withdrawalType}>
-                {withdrawalType}
-              </option>
-            ))}
-          </select>
-          {type === 'RETIREMENT' && isUnderRetirementAge && (
+          {isRetirementProduct && isUnderRetirementAge && (
             <span className="field-hint">
-              Retirement withdrawals require age over 65 — you are {investorAge}.
+              This is a retirement product — withdrawals require age over 65. You are {investorAge}.
             </span>
           )}
         </div>

@@ -28,6 +28,6 @@ public class PortfolioMapper {
     }
 
     private ProductSummary toProductSummary(Product product) {
-        return new ProductSummary(product.getId(), product.getName(), product.getBalance());
+        return new ProductSummary(product.getId(), product.getName(), product.getProductType(), product.getBalance());
     }
 }

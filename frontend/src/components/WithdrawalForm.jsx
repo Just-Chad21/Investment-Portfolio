@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ApiError, submitWithdrawal } from '../api/client';
-
-const RETIREMENT_PRODUCT_TYPES = new Set(['RETIREMENT_ANNUITY', 'PRESERVATION_FUND']);
+import { isRetirementProduct } from '../productTypes';
 
 const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   style: 'currency',
@@ -75,7 +74,7 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
 
   const isUnderRetirementAge = typeof investorAge === 'number' && investorAge <= 65;
   const selectedProduct = products.find((product) => String(product.productId) === productId);
-  const isRetirementProduct = selectedProduct && RETIREMENT_PRODUCT_TYPES.has(selectedProduct.productType);
+  const isRetirementSelected = selectedProduct && isRetirementProduct(selectedProduct.productType);
 
   return (
     <div className="modal-body">
@@ -112,7 +111,7 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
             ))}
           </select>
           {fieldErrorFor('productId') && <span className="field-error">{fieldErrorFor('productId')}</span>}
-          {isRetirementProduct && isUnderRetirementAge && (
+          {isRetirementSelected && isUnderRetirementAge && (
             <span className="field-hint">
               This is a retirement product — withdrawals require age over 65. You are {investorAge}.
             </span>

@@ -395,6 +395,36 @@ button[type='submit']:disabled {
   margin-bottom: 14px;
 }
 
+.history-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.history-filters .form-field {
+  margin-bottom: 0;
+  min-width: 130px;
+}
+
+.clear-filters-button {
+  border: 1px solid var(--border-strong);
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.clear-filters-button:hover {
+  color: var(--ink);
+  border-color: var(--muted);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

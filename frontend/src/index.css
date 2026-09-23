@@ -185,17 +185,15 @@ h2 {
   white-space: nowrap;
 }
 
+/* Always a single stacked column — value on top, holdings below. A side-by-side split
+   was tried here before, but an unbounded product list next to a short, fixed-height
+   hero left a growing gap under the hero as products were added. Stacking removes the
+   mismatch outright instead of trying to keep two independent columns balanced, and
+   means there's no separate desktop-only layout to keep responsive. */
 .portfolio-body {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 28px;
-}
-
-@media (min-width: 640px) {
-  .portfolio-body {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .hero-figure-label {
@@ -211,6 +209,12 @@ h2 {
   line-height: 1.1;
   margin: 0 0 18px;
   font-variant-numeric: proportional-nums;
+}
+
+@media (max-width: 380px) {
+  .hero-figure-value {
+    font-size: 34px;
+  }
 }
 
 .withdraw-trigger {
@@ -230,9 +234,24 @@ h2 {
   background: var(--signal-hover);
 }
 
+/* Capped at roughly 5 rows tall — a portfolio with many products scrolls internally
+   instead of growing the card (and the page) without bound. */
 .product-list {
   display: flex;
   flex-direction: column;
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.product-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product-list::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
 }
 
 .product-row {
@@ -240,27 +259,14 @@ h2 {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 11px 0 11px 11px;
+  padding: 11px 4px 11px 11px;
   border-top: 1px solid var(--border);
-  border-left: 2px solid transparent;
+  border-left: 2px solid var(--border-strong);
   font-size: 14px;
 }
 
 .product-row:first-child {
   border-top: 1px solid var(--border-strong);
-}
-
-@media (min-width: 640px) {
-  .product-row:first-child {
-    border-top: none;
-    padding-top: 0;
-  }
-}
-
-/* Retirement products get the one accent color in this list — everything else stays
-   quiet, so the eye lands on which rows carry the age-65 withdrawal restriction. */
-.product-row--retirement {
-  border-left-color: var(--sky);
 }
 
 .product-info {
@@ -272,18 +278,20 @@ h2 {
 
 .product-name {
   color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* Same treatment for every row regardless of category — the "Retirement"/"Standard"
+   word in the label itself is what tells them apart, not color. The lock icon is the
+   one retirement-only exception, since it's factual (age-gated), not decorative. */
 .product-category {
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 12px;
   color: var(--muted-2);
-}
-
-.product-row--retirement .product-category {
-  color: var(--sky);
 }
 
 .product-category svg {

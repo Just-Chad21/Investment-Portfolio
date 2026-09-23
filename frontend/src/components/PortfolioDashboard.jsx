@@ -56,7 +56,7 @@ export default function PortfolioDashboard({ investorId, portfolio, loading, err
           {portfolio.products.map((product) => {
             const retirement = isRetirementProduct(product.productType);
             return (
-              <div className={`product-row${retirement ? ' product-row--retirement' : ''}`} key={product.productId}>
+              <div className="product-row" key={product.productId}>
                 <div className="product-info">
                   <span className="product-name">{product.name}</span>
                   <span className="product-category">

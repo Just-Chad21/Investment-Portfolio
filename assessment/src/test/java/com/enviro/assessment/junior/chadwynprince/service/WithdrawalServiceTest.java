@@ -289,23 +289,45 @@ class WithdrawalServiceTest {
     @Test
     void exportCsvReturnsHeaderOnlyWhenNoWithdrawalsMatch() {
         when(investorRepository.existsById(INVESTOR_ID)).thenReturn(true);
+        when(investorRepository.findById(INVESTOR_ID)).thenReturn(Optional.of(investorAged(30)));
         when(withdrawalNoticeRepository.findByFilters(any(), any(), any(), any(), any())).thenReturn(List.of());
 
-        String csv = withdrawalService.exportCsv(INVESTOR_ID, null, null, null, null);
+        WithdrawalService.CsvExport export = withdrawalService.exportCsv(INVESTOR_ID, null, null, null, null);
 
-        assertThat(csv).isEqualTo("id,productName,type,amount,status,rejectionReason,balanceAfter,requestedAt\n");
+        assertThat(export.content()).isEqualTo("id,productName,type,amount,status,rejectionReason,balanceAfter,requestedAt\n");
     }
 
     @Test
     void exportCsvEscapesRejectionReasonContainingComma() {
         when(investorRepository.existsById(INVESTOR_ID)).thenReturn(true);
+        when(investorRepository.findById(INVESTOR_ID)).thenReturn(Optional.of(investorAged(30)));
         var product = productWithBalance("10000.00");
         var notice = WithdrawalNotice.rejected(product, INVESTOR_ID, WithdrawalType.RETIREMENT,
                 new BigDecimal("1000.00"), "age > 65 required, investor is 60");
         when(withdrawalNoticeRepository.findByFilters(any(), any(), any(), any(), any())).thenReturn(List.of(notice));
 
-        String csv = withdrawalService.exportCsv(INVESTOR_ID, null, null, null, null);
+        WithdrawalService.CsvExport export = withdrawalService.exportCsv(INVESTOR_ID, null, null, null, null);
 
-        assertThat(csv).contains("\"age > 65 required, investor is 60\"");
+        assertThat(export.content()).contains("\"age > 65 required, investor is 60\"");
+    }
+
+    @Test
+    void exportCsvFilenameIncludesInvestorNameAndTodaysDate() {
+        when(investorRepository.existsById(INVESTOR_ID)).thenReturn(true);
+        when(investorRepository.findById(INVESTOR_ID))
+                .thenReturn(Optional.of(new Investor("Grace", "van der Merwe", LocalDate.now().minusYears(68), "grace@example.com")));
+        when(withdrawalNoticeRepository.findByFilters(any(), any(), any(), any(), any())).thenReturn(List.of());
+
+        WithdrawalService.CsvExport export = withdrawalService.exportCsv(INVESTOR_ID, null, null, null, null);
+
+        assertThat(export.filename()).isEqualTo("Grace_van_der_Merwe_withdrawalhistory_" + LocalDate.now() + ".csv");
+    }
+
+    @Test
+    void exportCsvThrowsInvestorNotFoundWhenInvestorMissing() {
+        when(investorRepository.findById(INVESTOR_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> withdrawalService.exportCsv(INVESTOR_ID, null, null, null, null))
+                .isInstanceOf(InvestorNotFoundException.class);
     }
 }

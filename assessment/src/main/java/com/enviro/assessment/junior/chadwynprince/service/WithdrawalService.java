@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,9 +70,24 @@ public class WithdrawalService {
     }
 
     @Transactional(readOnly = true)
-    public String exportCsv(Long investorId, WithdrawalType type, WithdrawalStatus status,
-                             LocalDate from, LocalDate to) {
-        return withdrawalCsvWriter.write(findFiltered(investorId, type, status, from, to));
+    public CsvExport exportCsv(Long investorId, WithdrawalType type, WithdrawalStatus status,
+                                LocalDate from, LocalDate to) {
+        var investor = investorRepository.findById(investorId)
+                .orElseThrow(() -> new InvestorNotFoundException(investorId));
+        String csv = withdrawalCsvWriter.write(findFiltered(investorId, type, status, from, to));
+        return new CsvExport(csvFilename(investor), csv);
+    }
+
+    // e.g. "Thabo_Nkosi_withdrawalhistory_2026-09-23.csv" — sanitized so a name with spaces,
+    // apostrophes, etc. (e.g. "Grace van der Merwe") can't produce a malformed header value.
+    private String csvFilename(Investor investor) {
+        String namePart = (investor.getFirstName() + "_" + investor.getLastName())
+                .replaceAll("[^A-Za-z0-9]+", "_")
+                .replaceAll("^_+|_+$", "");
+        return "%s_withdrawalhistory_%s.csv".formatted(namePart, LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+    }
+
+    public record CsvExport(String filename, String content) {
     }
 
     private List<WithdrawalNotice> findFiltered(Long investorId, WithdrawalType type, WithdrawalStatus status,

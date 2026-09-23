@@ -52,10 +52,10 @@ public class WithdrawalController {
                                              @RequestParam(required = false) WithdrawalStatus status,
                                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        String csv = withdrawalService.exportCsv(investorId, type, status, from, to);
+        var export = withdrawalService.exportCsv(investorId, type, status, from, to);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"withdrawals.csv\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + export.filename() + "\"")
                 .contentType(MediaType.parseMediaType("text/csv"))
-                .body(csv);
+                .body(export.content());
     }
 }

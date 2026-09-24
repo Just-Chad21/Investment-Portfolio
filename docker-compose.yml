@@ -7,6 +7,12 @@ services:
       context: ./assessment
     ports:
       - "8080:8080"
+    # WithdrawalNotice.requestedAt (and other audit timestamps) are captured with
+    # LocalDateTime.now() — no timezone info attached. Without this, the container
+    # defaults to UTC and every timestamp shown in the frontend (which renders naive
+    # datetimes in the browser's local timezone) reads 2 hours behind for SAST users.
+    environment:
+      TZ: Africa/Johannesburg
     restart: unless-stopped
 
   frontend:

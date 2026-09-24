@@ -124,6 +124,17 @@ h2 {
   gap: 10px;
 }
 
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-subtitle {
+  font-size: 11.5px;
+  color: var(--muted-2);
+  line-height: 1.3;
+}
+
 .session-info {
   display: flex;
   align-items: center;

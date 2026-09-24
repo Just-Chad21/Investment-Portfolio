@@ -69,7 +69,10 @@ function App() {
       <div className="app-header">
         <div className="brand">
           <BrandMark />
-          <h1>Enviro365</h1>
+          <div className="brand-text">
+            <h1>Enviro365</h1>
+            <span className="brand-subtitle">Withdrawal Notice Portal</span>
+          </div>
         </div>
         <div className="session-info">
           <span className="muted">

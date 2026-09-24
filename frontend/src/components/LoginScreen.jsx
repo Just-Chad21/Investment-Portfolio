@@ -41,7 +41,7 @@ export default function LoginScreen({ onLoginSuccess }) {
           <BrandMark size={24} />
         </div>
         <h1>Welcome back</h1>
-        <p className="subtitle">Sign in to your Enviro365 withdrawal notice portal</p>
+        <p className="subtitle">Sign in to your Enviro365 Withdrawal Notice Portal</p>
 
         {error && (
           <p className="error-banner" role="alert">

@@ -35,12 +35,13 @@ export default function LoginScreen({ onLoginSuccess }) {
 
   return (
     <div className="login-screen">
+      <div className="login-glow" aria-hidden="true" />
       <form className="login-card" onSubmit={handleSubmit} noValidate>
-        <div className="login-brand">
-          <BrandMark size={22} />
-          <h1>Enviro365</h1>
+        <div className="login-badge">
+          <BrandMark size={24} />
         </div>
-        <p className="subtitle">Withdrawal notice portal</p>
+        <h1>Welcome back</h1>
+        <p className="subtitle">Sign in to your Enviro365 withdrawal notice portal</p>
 
         {error && (
           <p className="error-banner" role="alert">
@@ -60,25 +61,28 @@ export default function LoginScreen({ onLoginSuccess }) {
           />
         </div>
 
-        <button type="submit" disabled={submitting || !email}>
+        <button type="submit" className="login-submit" disabled={submitting || !email}>
           {submitting ? 'Logging in...' : 'Log in'}
         </button>
 
-        <div className="demo-accounts">
-          <p className="muted">Try a demo account</p>
-          <div className="demo-chip-row">
-            {DEMO_ACCOUNTS.map((account) => (
-              <button
-                key={account.email}
-                type="button"
-                className="demo-chip"
-                onClick={() => setEmail(account.email)}
-              >
-                {account.label}
-              </button>
-            ))}
-          </div>
+        <div className="login-divider">
+          <span>or try a demo account</span>
         </div>
+
+        <div className="demo-chip-row">
+          {DEMO_ACCOUNTS.map((account) => (
+            <button
+              key={account.email}
+              type="button"
+              className="demo-chip"
+              onClick={() => setEmail(account.email)}
+            >
+              {account.label}
+            </button>
+          ))}
+        </div>
+
+        <p className="login-footnote">Demo portal — seeded data only, no real funds.</p>
       </form>
     </div>
   );

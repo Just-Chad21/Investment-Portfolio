@@ -14,3 +14,9 @@ const RETIREMENT_PRODUCT_TYPES = new Set(['RETIREMENT_ANNUITY', 'PRESERVATION_FU
 export function isRetirementProduct(productType) {
   return RETIREMENT_PRODUCT_TYPES.has(productType);
 }
+
+// Mirrors WithdrawalService's MIN_RETIREMENT_AGE and MAX_WITHDRAWAL_RATIO — used to show
+// the same caps client-side (as a hint, never authoritative) instead of letting the user
+// find out only after a round trip to the server.
+export const MIN_RETIREMENT_AGE = 65;
+export const MAX_WITHDRAWAL_RATIO = 0.9;

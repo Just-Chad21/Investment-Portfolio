@@ -355,7 +355,7 @@ h2 {
 }
 
 .form-field label {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--muted);
 }
@@ -377,8 +377,15 @@ h2 {
 }
 
 .field-hint {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--muted-2);
+}
+
+/* A hint that means "this will be rejected if you continue" rather than neutral
+   context — needs to read as a warning, not just another muted caption. */
+.field-hint.warning {
+  color: var(--ember);
+  font-weight: 600;
 }
 
 .field-error {
@@ -453,8 +460,16 @@ button[type='submit']:disabled {
   border-color: var(--muted);
 }
 
+/* Scrolls horizontally instead of overflowing the page — the history table has 6
+   columns and no narrower layout, so on phone widths it needs somewhere to go. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 table {
   width: 100%;
+  min-width: 560px;
   border-collapse: collapse;
   font-size: 13.5px;
 }
@@ -596,7 +611,7 @@ td.muted {
 }
 
 .login-card .form-field label {
-  font-size: 12px;
+  font-size: 12.5px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--muted-2);

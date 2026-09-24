@@ -107,40 +107,42 @@ export default function WithdrawalHistoryTable({ investorId, refreshToken }) {
       )}
 
       {!loading && !error && history.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Product</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th className="amount-header">Amount</th>
-              <th>Reason</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.map((notice) => (
-              <tr key={notice.id}>
-                <td>{dateFormatter.format(new Date(notice.requestedAt))}</td>
-                <td>{notice.productName}</td>
-                <td>{notice.type}</td>
-                <td>
-                  {notice.status === 'APPROVED' ? (
-                    <span className="status-badge approved">
-                      <span aria-hidden="true">&#10003;</span> Approved
-                    </span>
-                  ) : (
-                    <span className="status-badge rejected">
-                      <span aria-hidden="true">&#10005;</span> Rejected
-                    </span>
-                  )}
-                </td>
-                <td className="amount-cell">{currencyFormatter.format(notice.amount)}</td>
-                <td className="muted">{notice.rejectionReason ?? '—'}</td>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Product</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th className="amount-header">Amount</th>
+                <th>Reason</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {history.map((notice) => (
+                <tr key={notice.id}>
+                  <td>{dateFormatter.format(new Date(notice.requestedAt))}</td>
+                  <td>{notice.productName}</td>
+                  <td>{notice.type}</td>
+                  <td>
+                    {notice.status === 'APPROVED' ? (
+                      <span className="status-badge approved">
+                        <span aria-hidden="true">&#10003;</span> Approved
+                      </span>
+                    ) : (
+                      <span className="status-badge rejected">
+                        <span aria-hidden="true">&#10005;</span> Rejected
+                      </span>
+                    )}
+                  </td>
+                  <td className="amount-cell">{currencyFormatter.format(notice.amount)}</td>
+                  <td className="muted">{notice.rejectionReason ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );

@@ -1,13 +1,15 @@
 import { ApiError } from '../api/client';
-import { PRODUCT_TYPE_LABELS, isRetirementProduct } from '../productTypes';
+import { MIN_RETIREMENT_AGE, PRODUCT_TYPE_LABELS, isRetirementProduct } from '../productTypes';
 
 const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   style: 'currency',
   currency: 'ZAR',
 });
 
-// A locked padlock — the one icon in this app that means something specific (age-gated),
-// rather than decoration, so it only ever appears next to a retirement product.
+// A locked padlock — shown only when THIS investor is currently blocked from THIS
+// product by the age rule, not just because the product is retirement-category. An
+// eligible investor (e.g. already over the age gate) sees the "Retirement" label with
+// no padlock, since nothing about it is actually locked for them.
 function LockIcon() {
   return (
     <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -18,6 +20,9 @@ function LockIcon() {
 }
 
 export default function PortfolioDashboard({ investorId, portfolio, loading, error, onRequestWithdrawal }) {
+  const investorAge = portfolio?.age;
+  const isUnderRetirementAge = typeof investorAge === 'number' && investorAge <= MIN_RETIREMENT_AGE;
+
   if (loading) {
     return <p className="muted">Loading portfolio...</p>;
   }
@@ -55,12 +60,13 @@ export default function PortfolioDashboard({ investorId, portfolio, loading, err
         <div className="product-list">
           {portfolio.products.map((product) => {
             const retirement = isRetirementProduct(product.productType);
+            const locked = retirement && isUnderRetirementAge;
             return (
               <div className="product-row" key={product.productId}>
                 <div className="product-info">
                   <span className="product-name">{product.name}</span>
                   <span className="product-category">
-                    {retirement && <LockIcon />}
+                    {locked && <LockIcon />}
                     {retirement ? 'Retirement' : 'Standard'} · {PRODUCT_TYPE_LABELS[product.productType] ?? product.productType}
                   </span>
                 </div>

@@ -15,10 +15,13 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
   const [submitError, setSubmitError] = useState(null);
   const [result, setResult] = useState(null);
 
-  // Client-side validation mirrors the server's shape *and* business-rule checks so the
-  // user gets instant feedback — the server (WithdrawalService) still re-validates
-  // everything; this never replaces that, it just avoids a round trip for input we can
-  // already tell will be rejected (over the 90% cap, or blocked by the age rule).
+  // Only catches input that isn't a real withdrawal attempt at all (nothing selected,
+  // no usable amount) — those are safe to stop at the field without ever reaching the
+  // server. Business-rule violations (over the 90% cap, blocked by the age rule) are
+  // deliberately NOT caught here: they're real attempts, and the server recording them
+  // as REJECTED (with the reason) is the audit trail this app is built to keep. The
+  // field-hint warnings below tell the user about those rules up front, but never stop
+  // the submit — see MIN_RETIREMENT_AGE/MAX_WITHDRAWAL_RATIO usage below.
   function validate() {
     const errors = {};
     if (!productId) {
@@ -26,11 +29,6 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
     }
     if (!amount || Number.isNaN(Number(amount)) || Number(amount) <= 0) {
       errors.amount = 'Enter an amount greater than 0.';
-    } else if (selectedProduct && Number(amount) > maxWithdrawable) {
-      errors.amount = `Enter an amount up to ${currencyFormatter.format(maxWithdrawable)} (90% of the balance).`;
-    }
-    if (blockedByAgeRule) {
-      errors.productId = `Retirement withdrawals require age over ${MIN_RETIREMENT_AGE}. You are ${investorAge}.`;
     }
     return errors;
   }
@@ -81,7 +79,7 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
   const isUnderRetirementAge = typeof investorAge === 'number' && investorAge <= MIN_RETIREMENT_AGE;
   const selectedProduct = products.find((product) => String(product.productId) === productId);
   const isRetirementSelected = selectedProduct && isRetirementProduct(selectedProduct.productType);
-  const blockedByAgeRule = Boolean(isRetirementSelected && isUnderRetirementAge);
+  const ageRuleWarning = Boolean(isRetirementSelected && isUnderRetirementAge);
   const maxWithdrawable = selectedProduct ? selectedProduct.balance * MAX_WITHDRAWAL_RATIO : null;
 
   return (
@@ -119,11 +117,11 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
             ))}
           </select>
           {fieldErrorFor('productId') && <span className="field-error">{fieldErrorFor('productId')}</span>}
-          {blockedByAgeRule && !fieldErrorFor('productId') && (
+          {ageRuleWarning && !fieldErrorFor('productId') && (
             <span className="field-hint warning">
               <span aria-hidden="true">⚠ </span>
               This is a retirement product — withdrawals require age over {MIN_RETIREMENT_AGE}. You are{' '}
-              {investorAge}, so this withdrawal can't be submitted.
+              {investorAge}, so this will likely be rejected.
             </span>
           )}
         </div>
@@ -147,7 +145,7 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
           )}
         </div>
 
-        <button type="submit" disabled={submitting || products.length === 0 || blockedByAgeRule}>
+        <button type="submit" disabled={submitting || products.length === 0}>
           {submitting ? 'Submitting...' : 'Submit withdrawal'}
         </button>
       </form>

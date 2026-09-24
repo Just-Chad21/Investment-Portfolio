@@ -19,6 +19,16 @@ export default function WithdrawalHistoryTable({ investorId, refreshToken }) {
 
   const hasActiveFilters = Object.values(filters).some((value) => value !== '');
 
+  // Switching investors invalidates any rows we're holding onto — clear them up front so
+  // a refetch in flight for the new investor can never briefly render the old one's data.
+  // Filter/refresh-triggered refetches below deliberately do NOT clear history: keeping
+  // the previous rows on screen while loading avoids the table collapsing to a one-line
+  // "Loading..." message and back, which was yanking the scroll position around on every
+  // filter change.
+  useEffect(() => {
+    setHistory([]);
+  }, [investorId]);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -94,20 +104,20 @@ export default function WithdrawalHistoryTable({ investorId, refreshToken }) {
         )}
       </div>
 
-      {loading && <p className="muted">Loading history...</p>}
-
       {error && (
         <p role="alert" className="error-banner">
           {error instanceof ApiError ? error.message : "Couldn't load withdrawal history."}
         </p>
       )}
 
-      {!loading && !error && history.length === 0 && (
+      {!error && loading && history.length === 0 && <p className="muted">Loading history...</p>}
+
+      {!error && !loading && history.length === 0 && (
         <p className="muted">{hasActiveFilters ? 'No withdrawals match these filters.' : 'No withdrawals yet.'}</p>
       )}
 
-      {!loading && !error && history.length > 0 && (
-        <div className="table-scroll">
+      {!error && history.length > 0 && (
+        <div className="table-scroll" aria-busy={loading}>
           <table>
             <thead>
               <tr>

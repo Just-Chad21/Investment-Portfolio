@@ -467,6 +467,14 @@ button[type='submit']:disabled {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Refetching (e.g. a filter change) keeps the previous rows mounted instead of
+   collapsing the table — this just dims them slightly so there's still a sense that
+   something happened, without any layout shift. */
+.table-scroll[aria-busy='true'] {
+  opacity: 0.55;
+  transition: opacity 150ms;
+}
+
 table {
   width: 100%;
   min-width: 560px;

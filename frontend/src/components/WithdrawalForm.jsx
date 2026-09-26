@@ -51,7 +51,7 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
         amount: Number(amount),
       });
       setResult(response);
-      // Both APPROVED and REJECTED are persisted outcomes (Phase 5 reconciliation), so
+      // Both APPROVED and REJECTED are persisted outcomes, so
       // either way the portfolio balance and history may have changed — refresh both.
       onSubmitted?.();
       if (response.status === 'APPROVED') {

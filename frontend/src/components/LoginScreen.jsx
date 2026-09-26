@@ -2,7 +2,7 @@ import { useState } from 'react';
 import BrandMark from './BrandMark';
 import { login } from '../api/client';
 
-// The 3 seeded demo investors (Phase 4) — shown as hint chips since there's no
+// The 3 seeded demo investors — shown as hint chips since there's no
 // self-registration. Clicking one fills the real email address rather than bypassing
 // the lookup, so the login still genuinely exercises the backend's email resolution.
 const DEMO_ACCOUNTS = [

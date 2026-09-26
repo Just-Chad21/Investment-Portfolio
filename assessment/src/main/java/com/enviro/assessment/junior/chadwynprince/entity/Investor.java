@@ -42,7 +42,7 @@ public class Investor {
         this.email = email;
     }
 
-    // Computed rather than stored, so it's always correct regardless of when the app is run (Phase 4 rationale).
+    // Computed rather than stored, so it's always correct regardless of when the app is run.
     public int getAge() {
         return Period.between(dateOfBirth, LocalDate.now()).getYears();
     }

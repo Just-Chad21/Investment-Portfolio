@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A rejection is a valid, recorded domain outcome here, not a thrown exception — see
- * Phase 5's "Design Reconciliation": submitWithdrawal always returns a WithdrawalResponse
- * (APPROVED or REJECTED); exceptions are reserved for requests that never reach a rule
- * evaluation at all (unknown investor/product).
+ * A rejection is a valid, recorded domain outcome here, not a thrown exception:
+ * submitWithdrawal always returns a WithdrawalResponse (APPROVED or REJECTED);
+ * exceptions are reserved for requests that never reach a rule evaluation at all
+ * (unknown investor/product).
  */
 @Service
 @RequiredArgsConstructor

@@ -10,7 +10,8 @@ public class WithdrawalCsvWriter {
 
     private static final String HEADER = "id,productName,type,amount,status,rejectionReason,balanceAfter,requestedAt";
 
-    // No rows beyond the header is a valid, non-error result (US5 acceptance criteria, Phase 2).
+    // No rows beyond the header is a valid, non-error result — an investor with no
+    // withdrawal history still gets a downloadable (empty) CSV, not an error.
     public String write(List<WithdrawalNotice> notices) {
         StringBuilder csv = new StringBuilder(HEADER).append("\n");
         for (WithdrawalNotice notice : notices) {

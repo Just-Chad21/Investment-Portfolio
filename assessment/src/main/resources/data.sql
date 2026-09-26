@@ -1,6 +1,6 @@
--- Seed data for the three Phase 2 personas. Birthdates use June 1 so age math
+-- Seed data for the three demo investors. Birthdates use June 1 so age math
 -- (Period.between(dateOfBirth, now)) stays correct for a long time after seeding,
--- not just on the day this was written (Phase 4 seed plan).
+-- not just on the day this was written.
 --
 -- Each investor holds a mix of standard and retirement-category products (all five
 -- ProductType values are represented at least once) and a spread of withdrawal notices

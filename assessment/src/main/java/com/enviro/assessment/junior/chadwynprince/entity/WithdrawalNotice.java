@@ -19,9 +19,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * investorId is denormalized from product.portfolio.investor — see Phase 4 rationale:
- * the dominant query ("this investor's withdrawal history") would otherwise need a
- * 3-table join, and the value never changes after creation so there's no sync risk.
+ * investorId is denormalized from product.portfolio.investor: the dominant query
+ * ("this investor's withdrawal history") would otherwise need a 3-table join, and
+ * the value never changes after creation so there's no sync risk.
  */
 @Entity
 @Table(name = "withdrawal_notice")

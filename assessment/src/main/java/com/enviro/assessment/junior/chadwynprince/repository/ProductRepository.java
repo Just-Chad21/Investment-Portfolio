@@ -11,6 +11,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByPortfolioId(Long portfolioId);
 
     // Scopes the lookup to the owning investor so a POST for a product that exists but
-    // belongs to someone else's portfolio is indistinguishable from "not found" (Phase 5).
+    // belongs to someone else's portfolio is indistinguishable from "not found".
     Optional<Product> findByIdAndPortfolio_Investor_Id(Long id, Long investorId);
 }

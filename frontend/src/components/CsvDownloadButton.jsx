@@ -2,7 +2,7 @@ import { csvExportUrl } from '../api/client';
 
 // A plain link to the backend's CSV endpoint, not a fetch+blob dance — the browser
 // handles the download natively using the filename from the server's
-// Content-Disposition header (Phase 5). Whatever filters are active in the history
+// Content-Disposition header. Whatever filters are active in the history
 // table are passed through so the download matches what's on screen.
 export default function CsvDownloadButton({ investorId, filters }) {
   return (

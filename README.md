@@ -70,3 +70,41 @@ cd assessment && mvn spring-boot:run
 # frontend — http://localhost:5173, with hot reload
 cd frontend && npm install && npm run dev
 ```
+
+## API documentation
+
+With the backend running (either way above), interactive API docs are generated from the code:
+
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- OpenAPI spec (JSON): http://localhost:8080/v3/api-docs
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/auth/login` | Resolve an email to an investor (no password) |
+| `GET` | `/api/investors/{id}/portfolio` | Investor details, products and balances, withdrawal rule limits |
+| `POST` | `/api/investors/{id}/withdrawals` | Submit a withdrawal; returns `201` with status `APPROVED` or `REJECTED` |
+| `GET` | `/api/investors/{id}/withdrawals` | History, newest first; optional `type`, `status`, `from`, `to` filters |
+| `GET` | `/api/investors/{id}/withdrawals/export` | Same history as a CSV download, same filters |
+
+A rule violation is not an HTTP error: it returns `201` with `status: REJECTED` and a
+`rejectionReason`, because rejected attempts are recorded too. Error statuses are reserved for
+invalid input (`400`, with per-field `fieldErrors`) and unknown investors or products (`404`).
+
+## Running the tests
+
+```
+cd assessment && mvn test
+```
+
+- **Unit tests** (`service/`) cover the business rules in isolation, including the
+  boundaries: age exactly 65 is rejected, exactly 90% of the balance is approved.
+- **Integration tests** (`ApiIntegrationTest`) boot the full application and exercise every
+  endpoint over HTTP against the seeded database: real queries and filters, validation and
+  error responses, and the CSV download. Each test rolls back, so they don't affect each other.
+
+## AI usage
+
+This project was built with the help of Claude Code (Anthropic's AI coding assistant), as the
+`Co-Authored-By` trailers on the commits show. I set the requirements and direction, reviewed
+the output, and asked for changes where the result wasn't right. For example, I asked for
+the mock login, and for the retirement rule to come from the product type instead of the request.

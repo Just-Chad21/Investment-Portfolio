@@ -93,14 +93,28 @@ invalid input (`400`, with per-field `fieldErrors`) and unknown investors or pro
 ## Running the tests
 
 ```
-cd assessment && mvn test
+cd assessment && mvn test                              # everything
+cd assessment && mvn test -Dtest=WithdrawalServiceTest # one class
+cd assessment && mvn test -Dtest='ApiIntegrationTest$History' # one group of integration tests
 ```
 
-- **Unit tests** (`service/`) cover the business rules in isolation, including the
-  boundaries: age exactly 65 is rejected, exactly 90% of the balance is approved.
-- **Integration tests** (`ApiIntegrationTest`) boot the full application and exercise every
-  endpoint over HTTP against the seeded database: real queries and filters, validation and
-  error responses, and the CSV download. Each test rolls back, so they don't affect each other.
+All tests live in `assessment/src/test/java/.../chadwynprince/`:
+
+| Test class | Kind | What it covers |
+|---|---|---|
+| `service/WithdrawalServiceTest` | Unit (mocked repositories) | Both withdrawal rules and their boundaries (age exactly 65 is rejected, exactly 90% is approved), history date bounds, CSV content and filename |
+| `service/PortfolioServiceTest` | Unit | Portfolio response, including the withdrawal rule limits |
+| `service/AuthServiceTest` | Unit | Email lookup for the mock login, case-insensitive |
+| `ApiIntegrationTest` | Integration | Every endpoint through the full app against the seeded data: real filter queries, validation and error responses, rule outcomes, CSV download headers |
+| `AssessmentApplicationTests` | Smoke | The app starts and the schema and seed scripts run |
+
+The unit tests run in milliseconds and pin down the rule logic. The integration tests catch
+what mocks can't: wrong queries, request validation, JSON shapes, and HTTP status codes.
+
+The integration tests boot the whole application but send requests through MockMvc, without
+opening a port, and use their own in-memory database. Each test is rolled back, so tests
+don't affect each other. They can run while the app is running on port 8080; the only thing
+they share is `target/classes`, so restart the app after changing Java code.
 
 ## AI usage
 

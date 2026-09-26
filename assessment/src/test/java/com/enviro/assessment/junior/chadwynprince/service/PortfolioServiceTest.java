@@ -27,6 +27,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+/**
+ * Unit tests for building the portfolio response (investor details, age, products, withdrawal rules)
+ * from mocked repositories, and the not-found case.
+ */
 @ExtendWith(MockitoExtension.class)
 class PortfolioServiceTest {
 

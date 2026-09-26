@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+/** Unit tests for the mock login's email-to-investor lookup, with a mocked repository (no database). */
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 

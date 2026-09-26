@@ -46,6 +46,7 @@ class ApiIntegrationTest {
                 "{\"productId\": %d, \"amount\": %s}".formatted(productId, amount));
     }
 
+    /** POST /api/auth/login: email lookup, 404 for unknown accounts, 400 for malformed input. */
     @Nested
     class Login {
 
@@ -73,6 +74,7 @@ class ApiIntegrationTest {
         }
     }
 
+    /** GET /api/investors/{id}/portfolio: response shape including withdrawalRules, and 404 for unknown investors. */
     @Nested
     class Portfolio {
 
@@ -96,6 +98,10 @@ class ApiIntegrationTest {
         }
     }
 
+    /**
+     * POST /api/investors/{id}/withdrawals: both rules end to end, including that rejections are saved
+     * without touching the balance. Product 1 is Thabo's R45,000 Unit Trust, so 90% is R40,500.
+     */
     @Nested
     class SubmitWithdrawal {
 
@@ -171,6 +177,7 @@ class ApiIntegrationTest {
         }
     }
 
+    /** GET /api/investors/{id}/withdrawals: runs the real filter query against Grace's 4 seeded notices. */
     @Nested
     class History {
 
@@ -223,6 +230,7 @@ class ApiIntegrationTest {
         }
     }
 
+    /** GET /api/investors/{id}/withdrawals/export: download headers, row count, and header-only output when nothing matches. */
     @Nested
     class CsvExport {
 

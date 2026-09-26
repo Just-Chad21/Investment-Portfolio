@@ -41,6 +41,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Unit tests for the withdrawal rules, history and CSV export, with mocked repositories (no database).
+ * Investors are built by age (investorAged) so each rule boundary is set up explicitly; save() echoes its argument.
+ * Real queries and filtering are covered by ApiIntegrationTest.
+ */
 @ExtendWith(MockitoExtension.class)
 class WithdrawalServiceTest {
 

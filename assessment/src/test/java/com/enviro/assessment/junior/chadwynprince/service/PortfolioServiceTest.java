@@ -2,6 +2,7 @@ package com.enviro.assessment.junior.chadwynprince.service;
 
 import com.enviro.assessment.junior.chadwynprince.dto.response.PortfolioResponse;
 import com.enviro.assessment.junior.chadwynprince.dto.response.ProductSummary;
+import com.enviro.assessment.junior.chadwynprince.dto.response.WithdrawalRules;
 import com.enviro.assessment.junior.chadwynprince.entity.Investor;
 import com.enviro.assessment.junior.chadwynprince.entity.Portfolio;
 import com.enviro.assessment.junior.chadwynprince.entity.Product;
@@ -55,6 +56,8 @@ class PortfolioServiceTest {
         assertThat(response.portfolioNumber()).isEqualTo("PF-0001");
         assertThat(response.products())
                 .containsExactly(new ProductSummary(null, "Unit Trust", ProductType.UNIT_TRUST, new BigDecimal("50000.00")));
+        assertThat(response.withdrawalRules())
+                .isEqualTo(new WithdrawalRules(65, new BigDecimal("0.90")));
     }
 
     @Test

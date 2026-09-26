@@ -2,8 +2,10 @@ package com.enviro.assessment.junior.chadwynprince.mapper;
 
 import com.enviro.assessment.junior.chadwynprince.dto.response.PortfolioResponse;
 import com.enviro.assessment.junior.chadwynprince.dto.response.ProductSummary;
+import com.enviro.assessment.junior.chadwynprince.dto.response.WithdrawalRules;
 import com.enviro.assessment.junior.chadwynprince.entity.Portfolio;
 import com.enviro.assessment.junior.chadwynprince.entity.Product;
+import com.enviro.assessment.junior.chadwynprince.service.WithdrawalService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -23,7 +25,8 @@ public class PortfolioMapper {
                 investor.getLastName(),
                 investor.getAge(),
                 portfolio.getPortfolioNumber(),
-                productSummaries
+                productSummaries,
+                new WithdrawalRules(WithdrawalService.MIN_RETIREMENT_AGE, WithdrawalService.MAX_WITHDRAWAL_RATIO)
         );
     }
 

@@ -36,8 +36,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class WithdrawalService {
 
-    private static final int MIN_RETIREMENT_AGE = 65;
-    private static final BigDecimal MAX_WITHDRAWAL_RATIO = new BigDecimal("0.90");
+    public static final int MIN_RETIREMENT_AGE = 65;
+    public static final BigDecimal MAX_WITHDRAWAL_RATIO = new BigDecimal("0.90");
+    private static final String MAX_WITHDRAWAL_PERCENT =
+            MAX_WITHDRAWAL_RATIO.movePointRight(2).stripTrailingZeros().toPlainString();
 
     private final InvestorRepository investorRepository;
     private final ProductRepository productRepository;
@@ -124,14 +126,15 @@ public class WithdrawalService {
     // can't dodge the age rule by simply not declaring itself RETIREMENT.
     private Optional<String> evaluateRules(Investor investor, Product product, WithdrawalRequest request) {
         if (product.getProductType().isRetirement() && investor.getAge() <= MIN_RETIREMENT_AGE) {
-            return Optional.of("Retirement withdrawals require age > 65 (investor is %d)".formatted(investor.getAge()));
+            return Optional.of("Retirement withdrawals require age > %d (investor is %d)"
+                    .formatted(MIN_RETIREMENT_AGE, investor.getAge()));
         }
         if (request.amount().compareTo(product.getBalance()) > 0) {
             return Optional.of("Withdrawal amount exceeds available balance");
         }
         BigDecimal maxAllowed = product.getBalance().multiply(MAX_WITHDRAWAL_RATIO);
         if (request.amount().compareTo(maxAllowed) > 0) {
-            return Optional.of("Withdrawal amount exceeds 90% of available balance");
+            return Optional.of("Withdrawal amount exceeds %s%% of available balance".formatted(MAX_WITHDRAWAL_PERCENT));
         }
         return Optional.empty();
     }

@@ -8,6 +8,7 @@ public record PortfolioResponse(
         String lastName,
         int age,
         String portfolioNumber,
-        List<ProductSummary> products
+        List<ProductSummary> products,
+        WithdrawalRules withdrawalRules
 ) {
 }

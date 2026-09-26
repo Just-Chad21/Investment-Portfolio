@@ -103,6 +103,7 @@ function App() {
             investorId={investorId}
             products={portfolio.products}
             investorAge={portfolio.age}
+            withdrawalRules={portfolio.withdrawalRules}
             onSubmitted={handleWithdrawalSubmitted}
           />
         </Modal>

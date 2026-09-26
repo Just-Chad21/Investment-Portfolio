@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { ApiError, submitWithdrawal } from '../api/client';
-import { isRetirementProduct, MAX_WITHDRAWAL_RATIO, MIN_RETIREMENT_AGE } from '../productTypes';
+import { isRetirementProduct } from '../productTypes';
 
 const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   style: 'currency',
   currency: 'ZAR',
 });
 
-export default function WithdrawalForm({ investorId, products, investorAge, onSubmitted }) {
+export default function WithdrawalForm({ investorId, products, investorAge, withdrawalRules, onSubmitted }) {
+  const { minRetirementAge, maxWithdrawalRatio } = withdrawalRules;
   const [productId, setProductId] = useState('');
   const [amount, setAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -17,11 +18,11 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
 
   // Only catches input that isn't a real withdrawal attempt at all (nothing selected,
   // no usable amount) — those are safe to stop at the field without ever reaching the
-  // server. Business-rule violations (over the 90% cap, blocked by the age rule) are
+  // server. Business-rule violations (over the withdrawal cap, blocked by the age rule) are
   // deliberately NOT caught here: they're real attempts, and the server recording them
   // as REJECTED (with the reason) is the audit trail this app is built to keep. The
   // field-hint warnings below tell the user about those rules up front, but never stop
-  // the submit — see MIN_RETIREMENT_AGE/MAX_WITHDRAWAL_RATIO usage below.
+  // the submit.
   function validate() {
     const errors = {};
     if (!productId) {
@@ -76,11 +77,11 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
 
   const hasFieldErrors = submitError instanceof ApiError && submitError.fieldErrors.length > 0;
 
-  const isUnderRetirementAge = typeof investorAge === 'number' && investorAge <= MIN_RETIREMENT_AGE;
+  const isUnderRetirementAge = typeof investorAge === 'number' && investorAge <= minRetirementAge;
   const selectedProduct = products.find((product) => String(product.productId) === productId);
   const isRetirementSelected = selectedProduct && isRetirementProduct(selectedProduct.productType);
   const ageRuleWarning = Boolean(isRetirementSelected && isUnderRetirementAge);
-  const maxWithdrawable = selectedProduct ? selectedProduct.balance * MAX_WITHDRAWAL_RATIO : null;
+  const maxWithdrawable = selectedProduct ? selectedProduct.balance * maxWithdrawalRatio : null;
 
   return (
     <div className="modal-body">
@@ -120,7 +121,7 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
           {ageRuleWarning && !fieldErrorFor('productId') && (
             <span className="field-hint warning">
               <span aria-hidden="true">⚠ </span>
-              This is a retirement product — withdrawals require age over {MIN_RETIREMENT_AGE}. You are{' '}
+              This is a retirement product — withdrawals require age over {minRetirementAge}. You are{' '}
               {investorAge}, so this will likely be rejected.
             </span>
           )}
@@ -140,7 +141,7 @@ export default function WithdrawalForm({ investorId, products, investorAge, onSu
           {fieldErrorFor('amount') && <span className="field-error">{fieldErrorFor('amount')}</span>}
           {!fieldErrorFor('amount') && maxWithdrawable != null && (
             <span className="field-hint">
-              You can withdraw up to {currencyFormatter.format(maxWithdrawable)} (90% of the balance).
+              You can withdraw up to {currencyFormatter.format(maxWithdrawable)} ({Math.round(maxWithdrawalRatio * 100)}% of the balance).
             </span>
           )}
         </div>

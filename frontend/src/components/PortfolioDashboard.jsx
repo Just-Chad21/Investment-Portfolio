@@ -1,5 +1,5 @@
 import { ApiError } from '../api/client';
-import { MIN_RETIREMENT_AGE, PRODUCT_TYPE_LABELS, isRetirementProduct } from '../productTypes';
+import { PRODUCT_TYPE_LABELS, isRetirementProduct } from '../productTypes';
 
 const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   style: 'currency',
@@ -21,7 +21,8 @@ function LockIcon() {
 
 export default function PortfolioDashboard({ investorId, portfolio, loading, error, onRequestWithdrawal }) {
   const investorAge = portfolio?.age;
-  const isUnderRetirementAge = typeof investorAge === 'number' && investorAge <= MIN_RETIREMENT_AGE;
+  const minRetirementAge = portfolio?.withdrawalRules.minRetirementAge;
+  const isUnderRetirementAge = typeof investorAge === 'number' && investorAge <= minRetirementAge;
 
   if (loading) {
     return <p className="muted">Loading portfolio...</p>;

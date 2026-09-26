@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getPortfolio } from '../api/client';
 
-// Shared by PortfolioDashboard (renders it) and WithdrawalForm (needs the product list
-// for its dropdown) so there's one fetch and one source of truth, not two independent ones.
+/**
+ * Loads an investor's portfolio and reloads it whenever investorId changes. Called once in App,
+ * which passes the result to both PortfolioDashboard and WithdrawalForm so they share one fetch.
+ * Returns { portfolio, loading, error, refetch }; call refetch after a withdrawal to pick up new balances.
+ */
 export function usePortfolio(investorId) {
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Returns a cleanup that ignores the response if it arrives late, e.g. after switching investors,
+  // so a slow response for the previous investor can't overwrite the current one.
   const refetch = useCallback(() => {
     let cancelled = false;
     setLoading(true);
